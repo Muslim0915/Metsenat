@@ -25,9 +25,12 @@
             />
           </div>
           <div class="flex justify-center">
-            <div class="g-recaptcha" :data-sitekey="siteKey"></div>
+            <VueRecaptcha v-model:token="recaptchaToken" />
           </div>
-          <button class="bg-blue-500 cursor-pointer text-white font-rubik font-medium py-2 rounded">
+          <button
+            class="bg-blue-500 disabled:bg-blue-300 disabled:cursor-not-allowed cursor-pointer text-white font-rubik font-medium py-2 rounded"
+            :disabled="!isValid"
+          >
             Kirish
           </button>
         </form>
@@ -37,43 +40,47 @@
 </template>
 
 <script setup lang="ts">
-import {ref, onMounted} from "vue";
-import Logo from "@/components/Logo.vue";
-import axiosInstance from "@/api/axios.ts";
-import router from "@/router";
-import Loader from "@/components/Loader.vue";
+import { ref, computed } from "vue"
+import Logo from "@/components/Logo.vue"
+import Loader from "@/components/Loader.vue"
+import axiosInstance from "@/api/axios.ts"
+import router from "@/router"
+import VueRecaptcha from "@/components/VueRecaptcha.vue"
 
-const username = ref("");
-const password = ref("");
+const username = ref("")
+const password = ref("")
 const loading = ref(false)
 
-const siteKey = import.meta.env.VITE_RECAPTCHA_SITE_KEY;
+const recaptchaToken = ref<string | null>(null)
+
+const isValid = computed(() => {
+  return (
+    loading.value ||
+    username.value ||
+    password.value ||
+    recaptchaToken.value
+  )
+})
 
 const login = async () => {
   try {
-    loading.value = true;
-    const response = await axiosInstance.post('/auth/login/', {
+    loading.value = true
+
+    if(!isValid.value) return;
+
+    const response = await axiosInstance.post("/auth/login/", {
       username: username.value,
       password: password.value,
-    });
-      localStorage.setItem('token', response.data.access);
-      await router.push({name: 'Main'});
-  } catch (error) {
-    console.error('Login error:', error);
-  }
-  finally {
-    loading.value = false;
-  }
-};
+      recaptcha: recaptchaToken.value,
+    })
 
-onMounted(() => {
-  if (!document.querySelector("#recaptcha-script")) {
-    const script = document.createElement("script");
-    script.id = "recaptcha-script";
-    script.src = "https://www.google.com/recaptcha/api.js";
-    script.async = true;
-    script.defer = true;
-    document.head.appendChild(script);
+    localStorage.setItem("token", response.data.access)
+    await router.push({ name: "Main" })
+  } catch (error) {
+    console.error("Login error:", error)
+  } finally {
+    loading.value = false
   }
-});
+}
 </script>
+
