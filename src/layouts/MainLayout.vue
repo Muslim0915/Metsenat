@@ -1,6 +1,6 @@
 <template>
   <div class="flex flex-col flex-1 gap-2">
-    <header></header>
+    <AppNavbar />
     <main class="flex flex-col flex-1">
       <router-view />
     </main>
@@ -10,4 +10,5 @@
 
 <script setup lang="ts">
 
+import AppNavbar from "@/components/AppNavbar.vue";
 </script>
