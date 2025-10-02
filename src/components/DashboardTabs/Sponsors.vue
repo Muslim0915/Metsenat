@@ -13,17 +13,19 @@
         <SponsorsTableSkeleton v-if="loading"/>
         <tbody v-else>
         <tr v-for="(sponsor, index) in (sponsorData.results ?? [])" :key="sponsor.id" class="bg-white">
-          <td class="text-xs font-rubik font-medium py-8 px-4">{{ (parameters.page - 1) * parameters.page_size + index + 1 }}</td>
+          <td class="text-xs font-rubik font-medium py-8 px-4">
+            {{ (parameters.page - 1) * parameters.page_size + index + 1 }}
+          </td>
           <td class="text-xs font-rubik font-medium py-8 px-4">{{ sponsor.full_name }}</td>
           <td class="text-xs font-rubik font-medium py-8 px-4">{{ sponsor.phone }}</td>
-          <td class="text-xs font-rubik font-medium py-8 px-4">{{ sponsor.sum }}</td>
-          <td class="text-xs font-rubik font-medium py-8 px-4">{{ sponsor.spent }}</td>
+          <td class="text-xs font-rubik font-medium py-8 px-4">{{ sponsor.sum }} <span class="text-gray-400">UZS</span>
+          </td>
+          <td class="text-xs font-rubik font-medium py-8 px-4">{{ sponsor.spent }} <span
+              class="text-gray-400">UZS</span></td>
           <td class="text-xs font-rubik font-medium py-8 px-4">{{ getFormDate(sponsor.created_at) }}</td>
           <td class="text-xs font-rubik font-medium py-8 px-4">{{ sponsor.get_status_display }}</td>
-          <td class="flex items-center w-full h-full justify-between py-8 px-4">
-            <img class="cursor-pointer hover:scale-105" src="@/assets/images/svg/eye.svg" alt="eye">
-            <img class="cursor-pointer hover:scale-105" src="@/assets/images/svg/edit.svg" alt="edit">
-            <img class="cursor-pointer hover:scale-105" src="@/assets/images/svg/trash.svg" alt="delete">
+          <td class="flex items-center w-full h-full justify-center py-8 px-4">
+            <img class="cursor-pointer hover:scale-105" src="@/assets/images/svg/eye.svg" alt="eye" @click="openSponsorDetails(sponsor)">
           </td>
         </tr>
         </tbody>
@@ -48,8 +50,9 @@
           </div>
           <div class="flex items-center gap-2">
             <button
-                class="px-2 py-1 rounded cursor-pointer"
+                class="px-2 py-1 rounded border  border-gray-200"
                 :disabled="parameters.page === 1"
+                :class="parameters.page === 1 ? 'cursor-not-allowed bg-gray-300' : 'cursor-pointer bg-white'"
                 @click="changePage(parameters.page - 1)">
               <img src="@/assets/images/svg/arrow-left.svg" alt="arrow-left">
             </button>
@@ -65,10 +68,11 @@
             </button>
 
             <button
-                class="px-2 py-1 rounded cursor-pointer"
+                class="px-2 py-1 rounded  border border-gray-200"
                 :disabled="parameters.page === totalPages"
+                :class="parameters.page === totalPages ? 'cursor-not-allowed bg-gray-300' : 'cursor-pointer bg-white'"
                 @click="changePage(parameters.page + 1)">
-              <img src="@/assets/images/svg/arrow-right.svg" alt="arrow-right">
+              <img class="rotate-180" src="@/assets/images/svg/arrow-left.svg" alt="arrow-left">
             </button>
           </div>
         </div>
@@ -79,8 +83,9 @@
 
 <script setup lang="ts">
 import {computed, toRefs} from "vue"
-import type { IPagination, ISponsorList } from "@/typing/interfaces"
+import type {IPagination, ISponsorList} from "@/typing/interfaces"
 import SponsorsTableSkeleton from "@/skeletons/SponsorsTableSkeleton.vue";
+import {useRouter} from "vue-router";
 
 interface IProps {
   sponsorData: Partial<IPagination<ISponsorList>>;
@@ -94,18 +99,19 @@ interface IProps {
 }
 
 const props = defineProps<IProps>()
-const { parameters, sponsorData } = toRefs(props)
+const {parameters, sponsorData} = toRefs(props)
 const emit = defineEmits(["changePage", "updatePageSize"])
+const router = useRouter()
 
 const tableHeader = [
-  { id: 1, text: "#" },
-  { id: 2, text: "F.I.SH." },
-  { id: 3, text: "Tel.raqami" },
-  { id: 4, text: "Homiylik summasi" },
-  { id: 5, text: "Sarflangan summa" },
-  { id: 6, text: "Sana" },
-  { id: 7, text: "Holati" },
-  { id: 8, text: "Amallar" },
+  {id: 1, text: "#"},
+  {id: 2, text: "F.I.SH."},
+  {id: 3, text: "Tel.raqami"},
+  {id: 4, text: "Homiylik summasi"},
+  {id: 5, text: "Sarflangan summa"},
+  {id: 6, text: "Sana"},
+  {id: 7, text: "Holati"},
+  {id: 8, text: "Amallar"},
 ]
 
 const getFormDate = (date: string) => {
@@ -145,5 +151,9 @@ const changePage = (page: number) => {
 const onPageSizeChange = (e: Event) => {
   const value = Number((e.target as HTMLSelectElement).value)
   emit("updatePageSize", value)
+}
+
+const openSponsorDetails = (sponsor: ISponsorList) => {
+  router.push(`/sponsors/${sponsor.id}`)
 }
 </script>

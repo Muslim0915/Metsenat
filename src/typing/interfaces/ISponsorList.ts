@@ -8,6 +8,7 @@ export interface ISponsorList {
     spent: number;
     created_at: string;
     get_status_display: string;
+    is_legal?: boolean;
 }
 
 interface PaymentType {

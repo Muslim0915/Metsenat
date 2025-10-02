@@ -17,8 +17,9 @@
             <div class="flex items-center gap-2 bg-gray-200 rounded-md p-2">
               <img @click="fetchSponsorsList()" src="@/assets/images/svg/search.svg" alt="search"
                    class="w-6 h-6 cursor-pointer">
-              <input v-model="search" type="text" placeholder="Izlash"
-                     class="bg-transparent font-rubik flex-1 outline-none border-0">
+              <input
+                  v-model="search" type="text" placeholder="Izlash"
+                  class="bg-transparent font-rubik flex-1 outline-none border-0">
             </div>
             <div
                 class="flex items-center justify-center gap-2 py-3 px-8 bg-blue-100 text-blue-500 font-medium rounded-md cursor-pointer">
@@ -44,7 +45,7 @@
 </template>
 
 <script setup lang="ts">
-import {ref} from "vue";
+import {computed, ref} from "vue";
 import Dashboard from "@/components/DashboardTabs/Dashboard.vue";
 import Sponsors from "@/components/DashboardTabs/Sponsors.vue";
 import Students from "@/components/DashboardTabs/Students.vue";
@@ -63,15 +64,16 @@ const tabs = [
 
 const sponsorsData = ref<Partial<IPagination<ISponsorList>>>({});
 
-const parameters = ref({
+const parameters = computed(() => ({
   search: search.value,
   ordering: null,
   page: 1,
   page_size: 10
-})
+}))
 
 const fetchSponsorsList = async () => {
   loading.value = true
+  console.log(parameters.value)
   try {
     const response = await axiosInstance.get('/sponsor-list/', {
       params: parameters.value
@@ -79,8 +81,7 @@ const fetchSponsorsList = async () => {
     sponsorsData.value = response.data
   } catch (error) {
     console.log(error, 'error')
-  }
-  finally {
+  } finally {
     loading.value = false
   }
 }
