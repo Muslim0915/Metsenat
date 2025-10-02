@@ -1,7 +1,6 @@
 <template>
   <div class="flex flex-1 flex-col gap-6">
     <div class="container mx-auto">
-      <!-- Таблица -->
       <table class="w-full">
         <thead>
         <tr>
@@ -11,7 +10,8 @@
           </th>
         </tr>
         </thead>
-        <tbody>
+        <SponsorsTableSkeleton v-if="loading"/>
+        <tbody v-else>
         <tr v-for="(sponsor, index) in (sponsorData.results ?? [])" :key="sponsor.id" class="bg-white">
           <td class="text-xs font-rubik font-medium py-8 px-4">{{ (parameters.page - 1) * parameters.page_size + index + 1 }}</td>
           <td class="text-xs font-rubik font-medium py-8 px-4">{{ sponsor.full_name }}</td>
@@ -37,10 +37,7 @@
             ko'rsatilmoqda
           </span>
         </div>
-
-        <!-- Справа: пагинация -->
         <div class="flex items-center gap-4">
-          <!-- Select для page_size -->
           <div class="flex items-center gap-2">
             <span>Ko'rsatish</span>
             <select :value="parameters.page_size" @change="onPageSizeChange" class="border rounded px-2 py-1">
@@ -83,9 +80,11 @@
 <script setup lang="ts">
 import {computed, toRefs} from "vue"
 import type { IPagination, ISponsorList } from "@/typing/interfaces"
+import SponsorsTableSkeleton from "@/skeletons/SponsorsTableSkeleton.vue";
 
 interface IProps {
   sponsorData: Partial<IPagination<ISponsorList>>;
+  loading: boolean;
   parameters: {
     search: string;
     ordering: null | string;
@@ -136,9 +135,6 @@ const visiblePages = computed(() => {
   }
   return pages
 })
-
-
-
 
 const changePage = (page: number) => {
   if (page > 0 && page <= totalPages.value) {

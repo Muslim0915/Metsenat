@@ -31,9 +31,10 @@
     </div>
     <Dashboard v-if="activeTab === 1"/>
     <Sponsors
+        v-if="activeTab === 2"
         :sponsorData="sponsorsData ?? {}"
         :parameters="parameters"
-        v-if="activeTab === 2"
+        :loading="loading"
         @changePage="onChangePage"
         @updatePageSize="onUpdatePageSize"
     />
@@ -52,12 +53,14 @@ import type {IPagination, ISponsorList} from "@/typing/interfaces";
 
 const activeTab = ref(2);
 const search = ref("");
+const loading = ref(false)
 
 const tabs = [
   {id: 1, text: 'Dashboard'},
   {id: 2, text: 'Homiylar'},
   {id: 3, text: 'Talabalar'}
 ]
+
 const sponsorsData = ref<Partial<IPagination<ISponsorList>>>({});
 
 const parameters = ref({
@@ -66,7 +69,9 @@ const parameters = ref({
   page: 1,
   page_size: 10
 })
+
 const fetchSponsorsList = async () => {
+  loading.value = true
   try {
     const response = await axiosInstance.get('/sponsor-list/', {
       params: parameters.value
@@ -75,9 +80,11 @@ const fetchSponsorsList = async () => {
   } catch (error) {
     console.log(error, 'error')
   }
+  finally {
+    loading.value = false
+  }
 }
 
-// pagination handlers
 const onChangePage = (page: number) => {
   parameters.value.page = page
   fetchSponsorsList()
@@ -85,7 +92,6 @@ const onChangePage = (page: number) => {
 
 const onUpdatePageSize = (size: number) => {
   parameters.value.page_size = size
-  parameters.value.page = 1
   fetchSponsorsList()
 }
 
