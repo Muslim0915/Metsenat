@@ -1,6 +1,5 @@
 <template>
   <div class="flex flex-1 flex-col">
-    <!--tabs-->
     <div class="flex flex-col bg-[#FCFCFC] py-6">
       <div class="container mx-auto">
         <div class="flex items-center justify-between">
@@ -16,8 +15,10 @@
           </div>
           <div class="flex items-center gap-5">
             <div class="flex items-center gap-2 bg-gray-200 rounded-md p-2">
-              <img src="@/assets/images/svg/search.svg" alt="search" class="w-6 h-6">
-              <input type="text" placeholder="Izlash" class="bg-transparent font-rubik flex-1 outline-none border-0">
+              <img @click="fetchSponsorsList()" src="@/assets/images/svg/search.svg" alt="search"
+                   class="w-6 h-6 cursor-pointer">
+              <input v-model="search" type="text" placeholder="Izlash"
+                     class="bg-transparent font-rubik flex-1 outline-none border-0">
             </div>
             <div
                 class="flex items-center justify-center gap-2 py-3 px-8 bg-blue-100 text-blue-500 font-medium rounded-md cursor-pointer">
@@ -28,31 +29,65 @@
         </div>
       </div>
     </div>
-    <component :is="currentTabComponent" />
+    <Dashboard v-if="activeTab === 1"/>
+    <Sponsors
+        :sponsorData="sponsorsData ?? {}"
+        :parameters="parameters"
+        v-if="activeTab === 2"
+        @changePage="onChangePage"
+        @updatePageSize="onUpdatePageSize"
+    />
+
+    <Students v-if="activeTab === 3"/>
   </div>
 </template>
 
 <script setup lang="ts">
-import {ref, computed} from "vue";
+import {ref} from "vue";
 import Dashboard from "@/components/DashboardTabs/Dashboard.vue";
 import Sponsors from "@/components/DashboardTabs/Sponsors.vue";
 import Students from "@/components/DashboardTabs/Students.vue";
+import axiosInstance from "@/api/axios.ts";
+import type {IPagination, ISponsorList} from "@/typing/interfaces";
 
-const activeTab = ref(2)
+const activeTab = ref(2);
+const search = ref("");
 
 const tabs = [
   {id: 1, text: 'Dashboard'},
   {id: 2, text: 'Homiylar'},
   {id: 3, text: 'Talabalar'}
 ]
+const sponsorsData = ref<Partial<IPagination<ISponsorList>>>({});
 
-const tabComponents = [
-  {id: 1, component: Dashboard},
-  {id: 2, component: Sponsors},
-  {id: 3, component: Students}
-]
-
-const currentTabComponent = computed(() => {
-  return tabComponents.find(tab => tab.id === activeTab.value)?.component
+const parameters = ref({
+  search: search.value,
+  ordering: null,
+  page: 1,
+  page_size: 10
 })
+const fetchSponsorsList = async () => {
+  try {
+    const response = await axiosInstance.get('/sponsor-list/', {
+      params: parameters.value
+    })
+    sponsorsData.value = response.data
+  } catch (error) {
+    console.log(error, 'error')
+  }
+}
+
+// pagination handlers
+const onChangePage = (page: number) => {
+  parameters.value.page = page
+  fetchSponsorsList()
+}
+
+const onUpdatePageSize = (size: number) => {
+  parameters.value.page_size = size
+  parameters.value.page = 1
+  fetchSponsorsList()
+}
+
+fetchSponsorsList();
 </script>

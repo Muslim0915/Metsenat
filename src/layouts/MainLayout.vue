@@ -1,7 +1,7 @@
 <template>
   <div class="flex flex-col flex-1">
     <AppNavbar />
-    <main class="flex flex-col flex-1">
+    <main class="flex flex-col flex-1 pb-20">
       <router-view />
     </main>
     <footer></footer>
