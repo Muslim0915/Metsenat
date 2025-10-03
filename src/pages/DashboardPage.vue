@@ -45,7 +45,7 @@
 </template>
 
 <script setup lang="ts">
-import {computed, ref} from "vue";
+import {computed, onMounted, ref} from "vue";
 import Dashboard from "@/components/DashboardTabs/Dashboard.vue";
 import Sponsors from "@/components/DashboardTabs/Sponsors.vue";
 import Students from "@/components/DashboardTabs/Students.vue";
@@ -110,6 +110,8 @@ const onUpdatePageSize = (size: number) => {
   fetchSponsorsList()
 }
 
-fetchSponsorsList();
-fetchDashboardData();
+onMounted(() => {
+  fetchSponsorsList();
+  fetchDashboardData();
+})
 </script>
