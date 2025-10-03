@@ -1,5 +1,5 @@
 <template>
-  <div class="flex flex-1 flex-col">
+  <div class="flex flex-1 flex-col pb-20">
     <div class="flex flex-col bg-[#FCFCFC] py-6">
       <div class="container mx-auto">
         <div class="flex items-center justify-between">
@@ -30,7 +30,7 @@
         </div>
       </div>
     </div>
-    <Dashboard v-if="activeTab === 1"/>
+    <Dashboard :dashboardData="dashboardData" v-if="activeTab === 1"/>
     <Sponsors
         v-if="activeTab === 2"
         :sponsorData="sponsorsData ?? {}"
@@ -51,10 +51,16 @@ import Sponsors from "@/components/DashboardTabs/Sponsors.vue";
 import Students from "@/components/DashboardTabs/Students.vue";
 import axiosInstance from "@/api/axios.ts";
 import type {IPagination, ISponsorList} from "@/typing/interfaces";
+import type {IDashboardData} from "@/typing/interfaces";
 
-const activeTab = ref(2);
+const activeTab = ref(1);
 const search = ref("");
 const loading = ref(false)
+const dashboardData = ref<IDashboardData>({
+  total_paid: 0,
+  total_need: 0,
+  total_must_pay: 0,
+})
 
 const tabs = [
   {id: 1, text: 'Dashboard'},
@@ -73,16 +79,24 @@ const parameters = computed(() => ({
 
 const fetchSponsorsList = async () => {
   loading.value = true
-  console.log(parameters.value)
   try {
     const response = await axiosInstance.get('/sponsor-list/', {
       params: parameters.value
     })
     sponsorsData.value = response.data
   } catch (error) {
-    console.log(error, 'error')
+    console.error(error, 'error')
   } finally {
     loading.value = false
+  }
+}
+
+const fetchDashboardData = async () => {
+  try {
+    const response = await axiosInstance.get('/dashboard/');
+    dashboardData.value = response.data;
+  } catch (error) {
+    console.error(error)
   }
 }
 
@@ -97,4 +111,5 @@ const onUpdatePageSize = (size: number) => {
 }
 
 fetchSponsorsList();
+fetchDashboardData();
 </script>
