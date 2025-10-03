@@ -49,7 +49,7 @@ import axiosInstance from "@/api/axios.ts";
 import {useRoute} from "vue-router";
 import router from "@/router";
 
-const sponsor = ref<ISponsorList>({})
+const sponsor = ref<Partial<ISponsorList>>({})
 const route = useRoute();
 
 const fetchSponsorDetails = async (id: number) => {
